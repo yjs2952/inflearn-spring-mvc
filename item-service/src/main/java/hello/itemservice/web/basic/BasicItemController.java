@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -71,11 +72,18 @@ public class BasicItemController {
         return "basic/item";
     }
 
-    @PostMapping("/add")
+//    @PostMapping("/add")
     public String addItemV5(Item item) {
         itemRepository.save(item);
 //        model.addAttribute("item", item); // 자동 추가, 생략 가능
-        return "redirect:/basic/items/" + item.getId();
+        return "redirect:/basic/items/" + item.getId(); // 이렇게 직접 값을 넘기면 url 인코딩이 안된다.
+    }
+    @PostMapping("/add")
+    public String addItemV6(Item item, RedirectAttributes redirectAttributes) {
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId()); // 자동 추가, 생략 가능
+        redirectAttributes.addAttribute("status", true); // 자동 추가, 생략 가능
+        return "redirect:/basic/items/{itemId}";    // RedirectAttributes 를 이용하여 안전하게 값을 넘긴다 (url 인코딩, PathVariable 도 처리 해준다.)
     }
 
     @GetMapping("/{itemId}/edit")
